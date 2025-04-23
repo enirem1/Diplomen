@@ -6,7 +6,7 @@
 #include <ArduinoJson.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <ArduinoJson.h>
+
 
 TFT_eSPI tft = TFT_eSPI();
 #define table_id 1
@@ -27,13 +27,13 @@ XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
 int FONT_SIZE = 1;
 
 // Touchscreen coordinates: (x, y) and pressure (z)
-const char* ssid = "enirem";
-const char* password = "12345678";
+const char* ssid = "Mihalew";
+const char* password = "Semeomed1";
 float total;
 byte showCat;
 byte showDish;
 byte stage;
-const char* baseAPI = "http://192.168.165.250:5000";  // Use a base URL for efficiency
+const char* baseAPI = "http://192.168.1.104:5000";  // Use a base URL for efficiency
 struct Category {
   int Id;
   String Name;
@@ -98,6 +98,7 @@ void setup() {
   showCat = 0;
   showDish = 0;
   Serial.begin(115200);
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
@@ -198,7 +199,6 @@ void fetchCategory() {
     String temp = "Total:" + String(total, 2);
     textX = 160 - tft.textWidth(temp);
     tft.drawString(temp, textX, 130, 4);
-      
   }
 }
 void fetchByCategory(int category) {
@@ -206,7 +206,10 @@ void fetchByCategory(int category) {
     Serial.println("WiFi Disconnected");
     return;
   }
-
+  Serial.println(category);
+  if (category < 1) {
+    category = 1;
+  }
 
   HTTPClient http;
   String url = String(baseAPI) + "/category/articles/" + String(category);
@@ -234,7 +237,12 @@ void fetchByCategory(int category) {
 
   JsonArray meals = doc.as<JsonArray>();
   int mealCount = meals.size();
-  Dish Dishes[mealCount];
+  if (mealCount <= 0) {
+  Serial.println("No meals found");
+  return;
+}
+
+  Dish* Dishes = new Dish[mealCount];
 
   for (int i = 0; i < mealCount; i++) {
     JsonObject meal = meals[i];
@@ -281,9 +289,10 @@ void fetchByCategory(int category) {
       tft.setCursor(50, 130);
       tft.print("Allergens:");
       drawRowText(Dishes[0].Allergies, 5, TEXT_MARGIN, 145, 1);
-
+      Serial.println("before show dish =1");
       showDish = 1;
     }
+    Serial.println("after show dish =1");
     if (touchscreen.tirqTouched() && touchscreen.touched()) {
       TS_Point p = touchscreen.getPoint();
       int touchX = map(p.x, 200, 3700, 1, SCREEN_WIDTH);
@@ -341,9 +350,11 @@ void fetchByCategory(int category) {
       tft.setCursor(50, 130);
       tft.print("Allergens:");
       drawRowText(Dishes[selected].Allergies, 5, TEXT_MARGIN, 145, 1);
-      
-    }
-  } else {
+    } 
+  delete[] Dishes;
+  }
+   // Release memory 
+  else {
     stage = 0;
   }
 }
@@ -415,7 +426,7 @@ void fetchAllergies(Dish& dish) {
   }
 
   JsonArray allergies = doc.as<JsonArray>();
-  for (int i = 0; i < allergies.size() && i < 20; i++) {
+  for (int i = 0; i <= allergies.size() && i < 20; i++) {
     dish.Allergies[i] = allergies[i]["name"].as<String>();
   }
 }
