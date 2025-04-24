@@ -24,14 +24,14 @@ XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
 #define TEXT_MAX_WIDTH (SCREEN_WIDTH - 2 * TEXT_MARGIN)
 int FONT_SIZE = 1;
 
-// Touchscreen coordinates: (x, y) and pressure (z)
+
 const char* ssid = "Mihalew";
 const char* password = "Semeomed1";
 float total;
 byte showCat;
 byte showDish;
 byte stage;
-const char* baseAPI = "http://192.168.1.104:5000";  // Use a base URL for efficiency
+const char* baseAPI = "http://192.168.1.104:5000";  
 struct Category {
   int Id;
   String Name;
@@ -73,14 +73,9 @@ void drawRowText(String words[], int count, int startX, int startY, int textSize
     cursorX += wordWidth + spaceWidth;  // Move cursor for next word
   }
 }
-
-
-
 void initUI() {
-
   tft.fillScreen(TFT_BLACK);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
-
   // Navigation Buttons
   tft.drawRect(0, 0, 45, 235, TFT_WHITE);
   tft.fillTriangle(30, 98, 30, 143, 8, 120, TFT_WHITE);
@@ -92,9 +87,7 @@ void initUI() {
   tft.fillTriangle(138, 205, 182, 205, 160, 227, TFT_WHITE);
 }
 void setup() {
-  selected = 0;
-  showCat = 0;
-  showDish = 0;
+  
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -112,39 +105,28 @@ void setup() {
   initUI();
   tft.drawString("Categories", 95, 40, 4);
 }
-
 void fetchCategory() {
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("WiFi Disconnected");
     return;
   }
-
   HTTPClient http;
   String url = String(baseAPI) + "/category";
   http.begin(url);
-
   int httpResponseCode = http.GET();
- 
-
   String payload = http.getString();
-
   http.end();
-
   DynamicJsonDocument doc(4096);
   DeserializationError error = deserializeJson(doc, payload);
-  
-
   JsonArray categories = doc.as<JsonArray>();
   int catCount = categories.size();
   Category cats[catCount];
-
   for (int i = 0; i < catCount; i++) {
     JsonObject category = categories[i];
     cats[i].Id = category["id"].as<int>();
     cats[i].Name = category["name"].as<String>();
   }
   int textX;
-
   if (showCat == 0) {
     initUI();
     textX = 160 - tft.textWidth(cats[0].Name);
@@ -156,23 +138,14 @@ void fetchCategory() {
     showCat = 1;
   }  // Print extracted values
   if (touchscreen.tirqTouched() && touchscreen.touched()) {
-
     TS_Point p = touchscreen.getPoint();
     int touchX = map(p.x, 200, 3700, 1, SCREEN_WIDTH);
     int touchY = map(p.y, 240, 3800, 1, SCREEN_HEIGHT);
-
     initUI();
-
-
-
     if (touchX > 46 && touchX < 273 && touchY < 35 && selected > 0) {  //up button
-
-
       selected = selected - 1;
     }
     if (touchX > 46 && touchX < 273 && touchY > 200 && selected < catCount - 1) {  //down button
-
-
       selected = selected + 1;
     }
     if (touchX > 275) {  //next button
@@ -192,38 +165,26 @@ void fetchCategory() {
 }
 void fetchByCategory(int category) {
   if (WiFi.status() != WL_CONNECTED) {
- 
+
     return;
   }
-  
   if (category < 1) {
     category = 1;
   }
-
   HTTPClient http;
   String url = String(baseAPI) + "/category/articles/" + String(category);
   http.begin(url);
-
   int httpResponseCode = http.GET();
-  
-
   String payload = http.getString();
-
   http.end();
-
   DynamicJsonDocument doc(4096);
   DeserializationError error = deserializeJson(doc, payload);
- 
-
   JsonArray meals = doc.as<JsonArray>();
   int mealCount = meals.size();
   if (mealCount <= 0) {
-
-  return;
-}
-
+    return;
+  }
   Dish* Dishes = new Dish[mealCount];
-
   for (int i = 0; i < mealCount; i++) {
     JsonObject meal = meals[i];
     Dishes[i].Id = meal["id"].as<int>();
@@ -269,10 +230,10 @@ void fetchByCategory(int category) {
       tft.setCursor(50, 130);
       tft.print("Allergens:");
       drawRowText(Dishes[0].Allergies, 5, TEXT_MARGIN, 145, 1);
-      
+
       showDish = 1;
     }
-  
+
     if (touchscreen.tirqTouched() && touchscreen.touched()) {
       TS_Point p = touchscreen.getPoint();
       int touchX = map(p.x, 200, 3700, 1, SCREEN_WIDTH);
@@ -330,31 +291,31 @@ void fetchByCategory(int category) {
       tft.setCursor(50, 130);
       tft.print("Allergens:");
       drawRowText(Dishes[selected].Allergies, 5, TEXT_MARGIN, 145, 1);
-    } 
-  delete[] Dishes;
+    }
+    delete[] Dishes;
   }
-   // Release memory 
+  // Release memory
   else {
     stage = 0;
   }
 }
 
 void fetchIngredients(Dish& dish) {
- 
+
   HTTPClient http;
   String url = String(baseAPI) + "/article/ingredients/" + String(dish.Id);
   http.begin(url);
 
   int httpResponseCode = http.GET();
-  
+
 
   String payload = http.getString();
-  
+
   http.end();
 
   DynamicJsonDocument doc(1024);
   DeserializationError error = deserializeJson(doc, payload);
- 
+
   JsonArray ingredients = doc.as<JsonArray>();
   for (int i = 0; i < ingredients.size() && i < 20; i++) {
     dish.Ingredients[i] = ingredients[i]["name"].as<String>();
@@ -362,21 +323,21 @@ void fetchIngredients(Dish& dish) {
 }
 
 void fetchAllergies(Dish& dish) {
-  
+
 
   HTTPClient http;
   String url = String(baseAPI) + "/article/allergies/" + String(dish.Id);
   http.begin(url);
 
- 
+
 
   String payload = http.getString();
- 
+
   http.end();
 
   DynamicJsonDocument doc(1024);
   DeserializationError error = deserializeJson(doc, payload);
- 
+
 
   JsonArray allergies = doc.as<JsonArray>();
   for (int i = 0; i <= allergies.size() && i < 20; i++) {
@@ -445,7 +406,7 @@ void SendOrder() {
         int httpResponseCode = http.POST(jsonData);
 
         // Handle response
-    
+
 
         // Close connection
         http.end();
@@ -458,8 +419,8 @@ void SendOrder() {
   }
 }
 void loop() {
-  
-   switch(stage) {
+
+  switch (stage) {
     case 0:  // Category selection
       fetchCategory();
       break;
