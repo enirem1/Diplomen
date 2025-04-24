@@ -4,8 +4,6 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
-#include <WiFi.h>
-#include <HTTPClient.h>
 
 
 TFT_eSPI tft = TFT_eSPI();
@@ -126,24 +124,15 @@ void fetchCategory() {
   http.begin(url);
 
   int httpResponseCode = http.GET();
-  if (httpResponseCode != 200) {
-    Serial.print("HTTP Request failed, error code: ");
-    Serial.println(httpResponseCode);
-    http.end();
-    return;
-  }
+ 
 
   String payload = http.getString();
-  Serial.println("API Response: " + payload);
+
   http.end();
 
   DynamicJsonDocument doc(4096);
   DeserializationError error = deserializeJson(doc, payload);
-  if (error) {
-    Serial.print("Deserialization failed: ");
-    Serial.println(error.f_str());
-    return;
-  }
+  
 
   JsonArray categories = doc.as<JsonArray>();
   int catCount = categories.size();
@@ -203,10 +192,10 @@ void fetchCategory() {
 }
 void fetchByCategory(int category) {
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("WiFi Disconnected");
+ 
     return;
   }
-  Serial.println(category);
+  
   if (category < 1) {
     category = 1;
   }
@@ -216,12 +205,7 @@ void fetchByCategory(int category) {
   http.begin(url);
 
   int httpResponseCode = http.GET();
-  if (httpResponseCode != 200) {
-    Serial.print("HTTP Request failed, error code: ");
-    Serial.println(httpResponseCode);
-    http.end();
-    return;
-  }
+  
 
   String payload = http.getString();
 
@@ -229,16 +213,12 @@ void fetchByCategory(int category) {
 
   DynamicJsonDocument doc(4096);
   DeserializationError error = deserializeJson(doc, payload);
-  if (error) {
-    Serial.print("Deserialization failed: ");
-    Serial.println(error.f_str());
-    return;
-  }
+ 
 
   JsonArray meals = doc.as<JsonArray>();
   int mealCount = meals.size();
   if (mealCount <= 0) {
-  Serial.println("No meals found");
+
   return;
 }
 
@@ -289,10 +269,10 @@ void fetchByCategory(int category) {
       tft.setCursor(50, 130);
       tft.print("Allergens:");
       drawRowText(Dishes[0].Allergies, 5, TEXT_MARGIN, 145, 1);
-      Serial.println("before show dish =1");
+      
       showDish = 1;
     }
-    Serial.println("after show dish =1");
+  
     if (touchscreen.tirqTouched() && touchscreen.touched()) {
       TS_Point p = touchscreen.getPoint();
       int touchX = map(p.x, 200, 3700, 1, SCREEN_WIDTH);
@@ -360,35 +340,21 @@ void fetchByCategory(int category) {
 }
 
 void fetchIngredients(Dish& dish) {
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("WiFi Disconnected");
-    return;
-  }
-
+ 
   HTTPClient http;
   String url = String(baseAPI) + "/article/ingredients/" + String(dish.Id);
   http.begin(url);
 
   int httpResponseCode = http.GET();
-  if (httpResponseCode != 200) {
-    Serial.print("HTTP Request failed, error code: ");
-    Serial.println(httpResponseCode);
-    http.end();
-    return;
-  }
+  
 
   String payload = http.getString();
-  Serial.println("Ingredients API Response: " + payload);
+  
   http.end();
 
   DynamicJsonDocument doc(1024);
   DeserializationError error = deserializeJson(doc, payload);
-  if (error) {
-    Serial.print("Deserialization failed: ");
-    Serial.println(error.f_str());
-    return;
-  }
-
+ 
   JsonArray ingredients = doc.as<JsonArray>();
   for (int i = 0; i < ingredients.size() && i < 20; i++) {
     dish.Ingredients[i] = ingredients[i]["name"].as<String>();
@@ -396,34 +362,21 @@ void fetchIngredients(Dish& dish) {
 }
 
 void fetchAllergies(Dish& dish) {
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("WiFi Disconnected");
-    return;
-  }
+  
 
   HTTPClient http;
   String url = String(baseAPI) + "/article/allergies/" + String(dish.Id);
   http.begin(url);
 
-  int httpResponseCode = http.GET();
-  if (httpResponseCode != 200) {
-    Serial.print("HTTP Request failed, error code: ");
-    Serial.println(httpResponseCode);
-    http.end();
-    return;
-  }
+ 
 
   String payload = http.getString();
-  Serial.println("Ingredients API Response: " + payload);
+ 
   http.end();
 
   DynamicJsonDocument doc(1024);
   DeserializationError error = deserializeJson(doc, payload);
-  if (error) {
-    Serial.print("Deserialization failed: ");
-    Serial.println(error.f_str());
-    return;
-  }
+ 
 
   JsonArray allergies = doc.as<JsonArray>();
   for (int i = 0; i <= allergies.size() && i < 20; i++) {
@@ -492,15 +445,7 @@ void SendOrder() {
         int httpResponseCode = http.POST(jsonData);
 
         // Handle response
-        if (httpResponseCode > 0) {
-          Serial.print("HTTP Response Code: ");
-          Serial.println(httpResponseCode);
-          String response = http.getString();
-          Serial.println("Response: " + response);
-        } else {
-          Serial.print("Error on sending POST request: ");
-          Serial.println(httpResponseCode);
-        }
+    
 
         // Close connection
         http.end();
@@ -513,19 +458,17 @@ void SendOrder() {
   }
 }
 void loop() {
-  stage = 0;
-  while (stage == 0) {
-
-    fetchCategory();
-    delay(100);
+  
+   switch(stage) {
+    case 0:  // Category selection
+      fetchCategory();
+      break;
+    case 1:  // Dish selection
+      fetchByCategory(selectedCategory.Id);
+      break;
+    case 2:  // Order confirmation
+      SendOrder();
+      break;
   }
-  while (stage == 1) {
-
-    fetchByCategory(selectedCategory.Id);
-    delay(100);
-  }
-  while (stage == 2) {
-    SendOrder();
-    delay(100);
-  }
+  delay(100);
 }
