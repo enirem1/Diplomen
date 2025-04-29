@@ -19,10 +19,9 @@ namespace Kelnercho
     {
 
         int row = 0;
-       
         static HttpClient client = new HttpClient();
-        private BindingList<Order> orders;  // Use BindingList for change notifications
-        private Timer refreshTimer;  // Timer to refresh orders periodically
+        private BindingList<Order> orders;  
+        private Timer refreshTimer;  
 
         public Form1()
         {
@@ -33,7 +32,7 @@ namespace Kelnercho
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             orders = new BindingList<Order>();  
             dataGridView1.DataSource = orders;  
-       
+             
             refreshTimer = new Timer();
             refreshTimer.Interval = 1000; 
             refreshTimer.Tick += RefreshTimer_Tick;
@@ -49,10 +48,9 @@ namespace Kelnercho
             
             if (dataGridView1.Rows.Count != 0)
             {
-               
-                SelectRow(row);// Reload the orders from the server
+                SortOrdersByOrderId();
+                SelectRow(row);
             }
-
         }
         private void InitializeDataGridView()
         {
@@ -101,10 +99,8 @@ namespace Kelnercho
         {
             try
             {
-                // Save the current scroll position
+               
                 int firstDisplayedScrollingRowIndex = dataGridView1.FirstDisplayedScrollingRowIndex;
-
-                // Suspend layout to prevent flickering
                 dataGridView1.SuspendLayout();
 
                 var response = await client.GetAsync("/Show/Orders");
@@ -114,14 +110,7 @@ namespace Kelnercho
                     var ordersList = JsonConvert.DeserializeObject<List<Order>>(ordersJson);
 
                     // Handle null OrderId values (optional, depending on your requirements)
-                    foreach (var order in ordersList)
-                    {
-                        if (order.OrderId == null)
-                        {
-                            // Assign a default value or skip the order
-                            order.OrderId = 0; // Example: Assign 0 for null OrderId
-                        }
-                    }
+
 
                     // Update the BindingList
                     orders.Clear();
@@ -139,11 +128,13 @@ namespace Kelnercho
                 else
                 {
                     MessageBox.Show("Error fetching orders. Status Code: " + response.StatusCode, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.Close();
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
             }
             finally
             {
@@ -157,6 +148,7 @@ namespace Kelnercho
             {
                 try
                 {
+                    
                     int? orderId = item.Cells["OrderId"].Value as int?; // Handle nullable OrderId
                     if (orderId.HasValue)
                     {
@@ -168,7 +160,7 @@ namespace Kelnercho
 
                         // Debug: Show the API response
                         var responseContent = await response.Content.ReadAsStringAsync();
-                        MessageBox.Show($"API Response: {responseContent}");
+                        
 
                         // Ensure the request was successful
                         response.EnsureSuccessStatusCode();
@@ -198,16 +190,7 @@ namespace Kelnercho
 
         private async void DeleteAll_Click(object sender, EventArgs e)
         {           
-                //// Confirmation before deletion
-                //var confirmResult = MessageBox.Show(
-                //    "Are you sure you want to delete all orders?",
-                //    "Confirm Delete All",
-                //    MessageBoxButtons.YesNo,
-                //    MessageBoxIcon.Warning
-                //);
-
-                //if (confirmResult == DialogResult.Yes)
-                //{
+               
                     try
                     {
                         // Loop through all orders and delete each from the server
@@ -258,10 +241,10 @@ namespace Kelnercho
         }
 
             private void SelectRow(int rowIndex)
-        {
+            {
             dataGridView1.ClearSelection();
             dataGridView1.Rows[rowIndex].Selected = true;
-        }
+            }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -269,6 +252,7 @@ namespace Kelnercho
             if (e.RowIndex >= 0)
             {
                 row = e.RowIndex;
+                SelectRow(row);
             }
             else if (e.ColumnIndex == 0)
             {
@@ -283,6 +267,7 @@ namespace Kelnercho
             if (e.RowIndex >= 0)
             {
                 row = e.RowIndex;
+                SelectRow(row);
             }
         }
 
@@ -303,10 +288,7 @@ namespace Kelnercho
         //}
 
         // Manually trigger a refresh after a new order is added
-        public void AddNewOrder(Order newOrder)
-        {
-            orders.Add(newOrder);  // Adds new order to the BindingList
-        }
+        
         private void SortOrdersByOrderId()
         {
             // Sort orders by OrderId and update the BindingList

@@ -25,3 +25,16 @@ C:\Users\User\Documents\Kelner-main\Winform\Kelnercho\obj\Release\Kelnercho.cspr
 C:\Users\User\Documents\Kelner-main\Winform\Kelnercho\obj\Release\Kelnercho.csproj.Up2Date
 C:\Users\User\Documents\Kelner-main\Winform\Kelnercho\obj\Release\Kelnercho.exe
 C:\Users\User\Documents\Kelner-main\Winform\Kelnercho\obj\Release\Kelnercho.pdb
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\bin\Release\Kelnercho.exe.config
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\bin\Release\Kelnercho.exe
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\bin\Release\Kelnercho.pdb
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\bin\Release\Newtonsoft.Json.dll
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\bin\Release\Newtonsoft.Json.xml
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\obj\Release\Kelnercho.csproj.AssemblyReference.cache
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\obj\Release\Kelnercho.Form1.resources
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\obj\Release\Kelnercho.Properties.Resources.resources
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\obj\Release\Kelnercho.csproj.GenerateResource.cache
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\obj\Release\Kelnercho.csproj.CoreCompileInputs.cache
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\obj\Release\Kelnercho.csproj.Up2Date
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\obj\Release\Kelnercho.exe
+C:\Users\enire\Documents\Diplomen\Winform\Kelnercho\obj\Release\Kelnercho.pdb
