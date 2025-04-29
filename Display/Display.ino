@@ -8,23 +8,18 @@
 
 TFT_eSPI tft = TFT_eSPI();
 #define table_id 1
-// Touchscreen pins
 #define XPT2046_IRQ 36   // T_IRQ
 #define XPT2046_MOSI 32  // T_DIN
 #define XPT2046_MISO 39  // T_OUT
 #define XPT2046_CLK 25   // T_CLK
 #define XPT2046_CS 33    // T_CS
-
 SPIClass touchscreenSPI = SPIClass(VSPI);
 XPT2046_Touchscreen touchscreen(XPT2046_CS, XPT2046_IRQ);
-
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 #define TEXT_MARGIN 50
 #define TEXT_MAX_WIDTH (SCREEN_WIDTH - 2 * TEXT_MARGIN)
 int FONT_SIZE = 1;
-
-
 const char* ssid = "Mihalew";
 const char* password = "Semeomed1";
 float total;
@@ -47,30 +42,24 @@ struct Dish {
 int selected;
 Category selectedCategory;
 Dish selectedDish;
-
-// Function to display ingredients in a row with wrapping
 void drawRowText(String words[], int count, int startX, int startY, int textSize) {
   int cursorX = startX;
   int cursorY = startY;
-  int spaceWidth = 6 * textSize;  // Space width
-
+  int spaceWidth = 6 * textSize;  
   tft.setTextSize(textSize);
   for (int i = 0; i < count; i++) {
-    int wordWidth = tft.textWidth(words[i].c_str());  // Convert String to C-string for width calculation
-
-    // Check if word fits on the current line
+    int wordWidth = tft.textWidth(words[i].c_str());  
     if (cursorX + wordWidth > TEXT_MAX_WIDTH) {
       cursorX = startX;
-      cursorY += 15;  // Move to the next row
+      cursorY += 15;
     }
-
     tft.setCursor(cursorX, cursorY);
     tft.print(words[i]);
     if (words[i] != "") {
-      tft.print(", ");  // Add comma if not the last word
+      tft.print(", ");  
       cursorX += tft.textWidth(", ");
     }
-    cursorX += wordWidth + spaceWidth;  // Move cursor for next word
+    cursorX += wordWidth + spaceWidth;  
   }
 }
 void initUI() {
@@ -192,16 +181,10 @@ void fetchByCategory(int category) {
     Dishes[i].Price = meal["price"].as<float>();
     Dishes[i].Weight = meal["weight"].as<int>();
   }
-
-  // Fetch ingredients for each dish
   for (int j = 0; j < mealCount; j++) {
     fetchIngredients(Dishes[j]);
     fetchAllergies(Dishes[j]);
   }
-
-  // Print extracted values
-
-
   if (mealCount > 0) {
     if (showDish == 0) {
 
@@ -233,22 +216,16 @@ void fetchByCategory(int category) {
 
       showDish = 1;
     }
-
     if (touchscreen.tirqTouched() && touchscreen.touched()) {
       TS_Point p = touchscreen.getPoint();
       int touchX = map(p.x, 200, 3700, 1, SCREEN_WIDTH);
       int touchY = map(p.y, 240, 3800, 1, SCREEN_HEIGHT);
-
-      if (touchX > 46 && touchX < 273 && touchY < 35) {  //up button
-
-
+      if (touchX > 46 && touchX < 273 && touchY < 35) {  
         selected = selected - 1;
       }
-      if (touchX > 46 && touchX < 273 && touchY > 200) {  //down button
+      if (touchX > 46 && touchX < 273 && touchY > 200) {  
         selected = selected + 1;
       }
-
-
       if (touchX < 45) {
         stage = 0;
         showCat = 0;
@@ -281,13 +258,9 @@ void fetchByCategory(int category) {
       tft.setCursor(cursorX, 40);
       tft.print("g.");
       tft.drawString(Dishes[selected].Name, 51, 57, 4);
-
-      // Display Ingredients in a Row
       tft.setCursor(50, 85);
       tft.print("Ingredients:");
       drawRowText(Dishes[selected].Ingredients, 10, TEXT_MARGIN, 100, 1);
-
-      // // Display Allergens in a Row
       tft.setCursor(50, 130);
       tft.print("Allergens:");
       drawRowText(Dishes[selected].Allergies, 5, TEXT_MARGIN, 145, 1);
@@ -319,16 +292,18 @@ void fetchIngredients(Dish& dish) {
   JsonArray ingredients = doc.as<JsonArray>();
   for (int i = 0; i < ingredients.size() && i < 20; i++) {
     dish.Ingredients[i] = ingredients[i]["name"].as<String>();
+   
   }
 }
 
 void fetchAllergies(Dish& dish) {
 
 
-  HTTPClient http;
-  String url = String(baseAPI) + "/article/allergies/" + String(dish.Id);
+HTTPClient http;
+  String url = String(baseAPI) + "/article/ingredients/" + String(dish.Id);
   http.begin(url);
 
+  int httpResponseCode = http.GET();
 
 
   String payload = http.getString();
@@ -338,10 +313,10 @@ void fetchAllergies(Dish& dish) {
   DynamicJsonDocument doc(1024);
   DeserializationError error = deserializeJson(doc, payload);
 
-
-  JsonArray allergies = doc.as<JsonArray>();
-  for (int i = 0; i <= allergies.size() && i < 20; i++) {
-    dish.Allergies[i] = allergies[i]["name"].as<String>();
+  JsonArray ingredients = doc.as<JsonArray>();
+  for (int i = 0; i < ingredients.size() && i < 20; i++) {
+    dish.Ingredients[i] = ingredients[i]["name"].as<String>();
+   
   }
 }
 void SendOrder() {
@@ -391,24 +366,12 @@ void SendOrder() {
         // Start HTTP POST request
         http.begin(url);
         http.addHeader("Content-Type", "application/json");
-
-        // Prepare JSON data
         DynamicJsonDocument doc(1024);
         doc["id_table"] = table_id;
         doc["id_article"] = selectedDish.Id;
-        doc["status"] = 0;
-
-
         String jsonData;
-        serializeJson(doc, jsonData);  // Convert JSON object to string
-
-        // Send POST request
+        serializeJson(doc, jsonData);  
         int httpResponseCode = http.POST(jsonData);
-
-        // Handle response
-
-
-        // Close connection
         http.end();
         stage = 0;
         showCat = 0;
@@ -419,15 +382,14 @@ void SendOrder() {
   }
 }
 void loop() {
-
   switch (stage) {
-    case 0:  // Category selection
+    case 0:  
       fetchCategory();
       break;
-    case 1:  // Dish selection
+    case 1:  
       fetchByCategory(selectedCategory.Id);
       break;
-    case 2:  // Order confirmation
+    case 2:  
       SendOrder();
       break;
   }
