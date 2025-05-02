@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 27, 2025 at 01:42 PM
+-- Generation Time: May 02, 2025 at 05:31 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -46,7 +46,11 @@ INSERT INTO `allergies` (`id`, `name`) VALUES
 (7, 'Peanuts'),
 (8, 'Shellfish'),
 (9, 'Wheat'),
-(10, 'Sesame');
+(10, 'Sesame'),
+(11, 'Mustard'),
+(12, 'Celery'),
+(13, 'Lupin'),
+(14, 'Sulfites');
 
 -- --------------------------------------------------------
 
@@ -85,7 +89,11 @@ INSERT INTO `article` (`id`, `name`, `price`, `weight`) VALUES
 (17, 'Chocolate Cake', 5.99, 200),
 (18, 'Cheesecake', 6.49, 220),
 (19, 'Apple Pie', 4.99, 230),
-(20, 'Tiramisu', 6.99, 250);
+(20, 'Tiramisu', 6.99, 250),
+(21, 'Fish and Chips', 14.99, 800),
+(22, 'Vegetable Soup', 6.99, 350),
+(23, 'Beef Burrito', 11.50, 650),
+(24, 'Caesar Salad Deluxe', 9.99, 450);
 
 -- --------------------------------------------------------
 
@@ -120,7 +128,10 @@ INSERT INTO `article_category` (`id_article`, `id_category`) VALUES
 (17, 12),
 (18, 12),
 (19, 12),
-(20, 12);
+(20, 12),
+(21, 9),
+(22, 14),
+(24, 6);
 
 -- --------------------------------------------------------
 
@@ -152,6 +163,12 @@ INSERT INTO `article_ingredient` (`id_article`, `id_ingredient`) VALUES
 (4, 5),
 (4, 6),
 (4, 7),
+(4, 21),
+(5, 1),
+(5, 8),
+(5, 25),
+(6, 26),
+(6, 27),
 (9, 11),
 (10, 12),
 (17, 14),
@@ -162,7 +179,11 @@ INSERT INTO `article_ingredient` (`id_article`, `id_ingredient`) VALUES
 (18, 20),
 (19, 15),
 (19, 18),
-(19, 19);
+(19, 19),
+(24, 5),
+(24, 6),
+(24, 26),
+(24, 27);
 
 -- --------------------------------------------------------
 
@@ -193,7 +214,8 @@ INSERT INTO `category` (`id`, `name`, `parent_id`) VALUES
 (10, 'Hot Beverages', 2),
 (11, 'Cold Beverages', 2),
 (12, 'Cakes', 3),
-(13, 'Pastries', 3);
+(13, 'Pastries', 3),
+(14, 'Soups', 1);
 
 -- --------------------------------------------------------
 
@@ -230,7 +252,19 @@ INSERT INTO `ingredients` (`id`, `name`) VALUES
 (17, 'Coffee Beans'),
 (18, 'Apple'),
 (19, 'Cinnamon'),
-(20, 'Vanilla Extract');
+(20, 'Vanilla Extract'),
+(21, 'Tortilla'),
+(22, 'Fish'),
+(23, 'Potatoes'),
+(24, 'Vegetable Stock'),
+(25, 'Ground Beef'),
+(26, 'Croutons'),
+(27, 'Caesar Dressing'),
+(28, 'Coffee'),
+(29, 'Mascarpone'),
+(30, 'Ladyfingers'),
+(31, 'Potato Wedges'),
+(32, 'Tartar Sauce');
 
 -- --------------------------------------------------------
 
@@ -251,8 +285,13 @@ INSERT INTO `ingredients_allergies` (`id_ingredient`, `id_allergie`) VALUES
 (2, 2),
 (6, 2),
 (9, 3),
+(12, 4),
 (13, 2),
-(15, 3);
+(14, 6),
+(15, 3),
+(16, 6),
+(25, 4),
+(29, 3);
 
 -- --------------------------------------------------------
 
@@ -265,13 +304,6 @@ CREATE TABLE `orders` (
   `id_table` int(11) DEFAULT NULL,
   `id_article` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`id`, `id_table`, `id_article`) VALUES
-(192, 1, 15);
 
 -- --------------------------------------------------------
 
@@ -290,7 +322,7 @@ CREATE TABLE `ttable` (
 
 INSERT INTO `ttable` (`id`, `total_Price`) VALUES
 (1, 45.98),
-(2, 38.49),
+(2, 53.48),
 (3, 21.99),
 (4, 30.50),
 (5, 55.99),
@@ -372,31 +404,31 @@ ALTER TABLE `ttable`
 -- AUTO_INCREMENT for table `allergies`
 --
 ALTER TABLE `allergies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `article`
 --
 ALTER TABLE `article`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `ingredients`
 --
 ALTER TABLE `ingredients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=194;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=274;
 
 --
 -- AUTO_INCREMENT for table `ttable`

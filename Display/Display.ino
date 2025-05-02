@@ -299,26 +299,23 @@ void fetchIngredients(Dish& dish) {
 void fetchAllergies(Dish& dish) {
 
 
-HTTPClient http;
-  String url = String(baseAPI) + "/article/ingredients/" + String(dish.Id);
+ HTTPClient http;
+  String url = String(baseAPI) + "/article/allergies/" + String(dish.Id);
   http.begin(url);
 
   int httpResponseCode = http.GET();
-
-
   String payload = http.getString();
-
   http.end();
 
   DynamicJsonDocument doc(1024);
   DeserializationError error = deserializeJson(doc, payload);
 
-  JsonArray ingredients = doc.as<JsonArray>();
-  for (int i = 0; i < ingredients.size() && i < 20; i++) {
-    dish.Ingredients[i] = ingredients[i]["name"].as<String>();
-   
+  JsonArray allergies = doc.as<JsonArray>();
+  for (int i = 0; i < allergies.size() && i < 20; i++) {
+    dish.Allergies[i] = allergies[i]["name"].as<String>();
   }
 }
+
 void SendOrder() {
 
   if (selected > -1) {

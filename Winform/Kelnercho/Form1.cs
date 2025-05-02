@@ -170,6 +170,7 @@ namespace Kelnercho
                         if (orderToRemove != null)
                         {
                             orders.Remove(orderToRemove);
+                            row = 0;
                         }
                     }
                     else
